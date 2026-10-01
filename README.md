@@ -2,7 +2,9 @@
 
 A full-stack tutor-booking demonstration built with **Next.js App Router, React, TypeScript and MongoDB/Mongoose**. This is an evolved portfolio version of Web Engineering coursework, focused on a working student → tutor → completed session → verified review journey.
 
-**Publication status:** locally validated against both an isolated replica set and the new synthetic MongoDB Atlas database; Vercel deployment is pending. There is no verified public demo URL yet. This release does not claim to implement every original assignment requirement.
+**Live Demo:** [EduConnect](https://edu-connect-ecru.vercel.app/)
+
+**Publication status:** deployed on Vercel with MongoDB Atlas and verified end-to-end using synthetic accounts on 2026-10-01. This release does not claim to implement every original assignment requirement.
 
 ## What works
 
@@ -127,6 +129,8 @@ This starts a synthetic replica set and the application on **http://localhost:30
 
 **Local validation (2026-10-01):** production build, standalone typecheck and ESLint passed with suppression removed; the integration and HTTP journeys passed. The same complete production HTTP journey passed against Atlas, including persistence after restarting Next.js and rerunning the idempotent seed. Browser checks covered student/tutor registration, profile editing, tutor filtering, booking, tutor acceptance/completion, persisted review expansion, admin verification and narrow-screen dashboards. The dependency audit reported zero known advisories at the time checked. These checks are not a penetration test or a load/performance benchmark.
 
+**Public production validation (2026-10-01):** Student, Tutor and Admin HTTPS logins passed. Approved-only tutor discovery, booking, tutor acceptance/completion, persisted review/rating and admin verification passed against the public deployment. Unauthenticated, forged-cookie, wrong-role, cross-origin, invalid-lifecycle and duplicate-review requests were denied. Fresh logins/API reads and a browser full-page refresh preserved the results. Session responses set `Secure`, `HttpOnly` and `SameSite=Lax`; the browser retained its authenticated session across refresh, and logout cleared the cookie. A separate synthetic tutor was left pending for the admin demonstration. These are bounded smoke checks, not a load test or security certification.
+
 ## Screenshots
 
 The images show the locally running production build using synthetic data.
@@ -139,7 +143,7 @@ The images show the locally running production build using synthetic data.
 
 ## Deployment: Vercel + MongoDB Atlas
 
-Deployment is intentionally pending publication approval.
+The live application is deployed at [edu-connect-ecru.vercel.app](https://edu-connect-ecru.vercel.app/). The following settings describe how to reproduce the deployment.
 
 1. Confirm the new Atlas database is reachable and run the seed/config checks locally. Atlas must support transactions; a standalone MongoDB server is unsuitable.
 2. After the reviewed changes are pushed, import the existing EduConnect GitHub repository into Vercel. Select **Next.js**, repository root, **Node 24.x**, install `npm ci`, build `npm run build`, and leave the output directory at the Next.js default. No separate backend or custom `vercel.json` is required.
@@ -161,6 +165,6 @@ References: [Vercel environment variables](https://vercel.com/kb/guide/how-to-ad
 - Large-dataset pagination: discovery, admin lists and session history are capped at 200 records; profile reviews at 50. Dashboard session totals describe the loaded history, not unbounded accounting.
 - Admin decisions are one-way for pending profiles in this release; profile content can be edited afterward. There is no credential-vetting or moderation service.
 - Shared demo accounts allow visitors to affect the same synthetic data. Retained pending requests reserve time until cancelled/rejected; there is no background expiry/reset service.
-- Local Windows production behavior has been tested. Hosted Vercel/Atlas behavior must still be verified after deployment.
+- Local Windows and the hosted Vercel/Atlas production journey have been smoke-tested. Changes to runtime, dependencies, environment variables or networking should be followed by another production check.
 
 The immutable recovered university archive was not changed. `.audit/`, local credentials, build output and dependency directories are excluded from publication.
