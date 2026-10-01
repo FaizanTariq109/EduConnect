@@ -27,7 +27,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { TeacherType } from "@/models/teacher";
+import type { TeacherType } from "@/models/teacher";
 
 import axios from "axios";
 
@@ -126,37 +126,37 @@ export default function TeacherSignupPage() {
     setIsLoading(true);
 
     try {
-      // Here you would normally make an API call to register the teacher
-      // For now, we'll simulate a successful registration
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const teacherObject: TeacherType = {
+      const teacherObject: Omit<TeacherType, "status"> = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        qualifications: formData.qualification.split(" ").map((q) => q.trim()),
+        qualifications: formData.qualification.split(",").map((q) => q.trim()),
         yoe: Number(formData.experience),
-        hourlyRate: formData.hourlyRate,
+        hourlyRate: Number(formData.hourlyRate),
         bio: formData.bio,
         subjects: formData.subjects,
         availability: formData.availability,
-        status: "pending",
       };
       const resp = await axios.post("/api/teachers/signup", teacherObject, {
         validateStatus: (status) => status < 500,
       });
-      //console.log(resp)
-      if (resp.status !== 200) {
-        toast.error("Registration failed:" + resp.data.message);
-        throw new Error(resp.data.message);
+      if (resp.status !== 201) {
+        toast.error(
+          "Registration failed:" +
+            (resp.data.fields?.[0]?.message || resp.data.message),
+        );
+        return;
       }
       toast.success(
         "Registration successful! Your account has been created. You can now login.",
       );
       // Redirect to login page after successful registration
       router.push("/login");
-    } catch (error: any) {
-      //console.log(error)
-      toast.error("Registration failed." + error.message);
+    } catch (error: unknown) {
+      toast.error(
+        "Registration failed." +
+          (error instanceof Error ? error.message : "Please try again."),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -211,6 +211,8 @@ export default function TeacherSignupPage() {
                     id="password"
                     name="password"
                     type="password"
+                    minLength={10}
+                    maxLength={72}
                     placeholder="Create a password"
                     value={formData.password}
                     onChange={handleChange}
@@ -224,6 +226,8 @@ export default function TeacherSignupPage() {
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
+                    minLength={10}
+                    maxLength={72}
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -254,7 +258,10 @@ export default function TeacherSignupPage() {
                   <Input
                     id="experience"
                     name="experience"
-                    placeholder="e.g., 5 years"
+                    type="number"
+                    min={0}
+                    max={60}
+                    placeholder="e.g., 5"
                     value={formData.experience}
                     onChange={handleChange}
                     required
@@ -265,6 +272,7 @@ export default function TeacherSignupPage() {
                 <Label htmlFor="hourlyRate">Hourly Rate (PKR)</Label>
                 <Input
                   id="hourlyRate"
+                  type="number"
                   name="hourlyRate"
                   value={formData.hourlyRate}
                   required
@@ -288,6 +296,8 @@ export default function TeacherSignupPage() {
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
+                  minLength={20}
+                  maxLength={1500}
                   name="bio"
                   placeholder="Tell students about yourself, your teaching style, and experience"
                   value={formData.bio}

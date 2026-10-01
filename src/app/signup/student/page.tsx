@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { StudentType } from "@/models/student";
+import type { StudentType } from "@/models/student";
 import axios from "axios";
 
 export default function StudentSignupPage() {
@@ -97,10 +97,6 @@ export default function StudentSignupPage() {
     setIsLoading(true);
 
     try {
-      // Here you would normally make an API call to register the student
-      // For now, we'll simulate a successful registration
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
       const studentData: StudentType = {
         name: formData.name,
         email: formData.email,
@@ -114,9 +110,12 @@ export default function StudentSignupPage() {
         validateStatus: (status) => status < 500,
       });
 
-      if (resp.status !== 200) {
-        toast.error("Registration failed:" + resp.data.message);
-        throw new Error(resp.data.message);
+      if (resp.status !== 201) {
+        toast.error(
+          "Registration failed:" +
+            (resp.data.fields?.[0]?.message || resp.data.message),
+        );
+        return;
       }
 
       toast.success(
@@ -124,7 +123,7 @@ export default function StudentSignupPage() {
       );
       // Redirect to login page after successful registration
       router.push("/login");
-    } catch (error) {
+    } catch {
       toast.error(
         "Registration failed. There was an error creating your account. Please try again.",
       );
@@ -182,6 +181,8 @@ export default function StudentSignupPage() {
                     id="password"
                     name="password"
                     type="password"
+                    minLength={10}
+                    maxLength={72}
                     placeholder="Create a password"
                     value={formData.password}
                     onChange={handleChange}
@@ -195,6 +196,8 @@ export default function StudentSignupPage() {
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
+                    minLength={10}
+                    maxLength={72}
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -244,7 +247,7 @@ export default function StudentSignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Subjects You're Interested In</Label>
+                <Label>Subjects You Are Interested In</Label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                   {subjects.map((subject) => (
                     <div key={subject} className="flex items-center space-x-2">

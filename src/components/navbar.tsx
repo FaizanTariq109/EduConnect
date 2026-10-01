@@ -1,81 +1,57 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
-import { useAuth } from "@/context/AuthContext"; // Import useAuth
-
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { api, message } from "@/lib/client-api";
+import { toast } from "sonner";
 export default function Navbar() {
-  const { isAuth, setIsAuth } = useAuth(); // Get authentication state
-  const [loading, setLoading] = useState(false);
-
-  const logout = async () => {
-    setLoading(true);
+  const { user, loading } = useAuth();
+  const [busy, setBusy] = useState(false);
+  async function logout() {
+    setBusy(true);
     try {
-      const res = await fetch("/api/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (res.ok) {
-        setIsAuth(false, "", ""); // Update context
-        window.location.href = "/";
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+      await api("logout", {});
+      window.location.assign("/login");
+    } catch (e) {
+      toast.error(message(e));
+      setBusy(false);
     }
-  };
-
+  }
   return (
-    <header className="w-full border-b bg-background">
-      <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6" />
-          <span className="text-lg hidden sm:block font-semibold">
-            EduConnect
-          </span>
+    <header className="border-b">
+      <nav className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <BookOpen size={22} />
+          EduConnect
         </Link>
-        <nav className="ml-auto flex gap-2 sm:gap-6">
-          <Link
-            href="/about"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="text-sm font-medium hover:underline underline-offset-4"
-          >
-            Contact
-          </Link>
-        </nav>
-        <div className="ml-2 flex items-center gap-2">
-          {isAuth.auth ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={logout}
-              disabled={loading}
-            >
-              {loading ? "Logging out..." : "Logout"}
-            </Button>
+        <div className="flex items-center gap-3 text-sm">
+          <Link href="/about">About</Link>
+          {loading ? (
+            <span>Loading…</span>
+          ) : user ? (
+            <>
+              <Link href={"/dashboard/" + user.role}>Dashboard</Link>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={logout}
+                disabled={busy}
+              >
+                Sign out
+              </Button>
+            </>
           ) : (
             <>
-              <Link href="/login">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button size="sm">Sign Up</Button>
-              </Link>
+              <Link href="/login">Login</Link>
+              <Button asChild size="sm">
+                <Link href="/signup">Sign up</Link>
+              </Button>
             </>
           )}
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

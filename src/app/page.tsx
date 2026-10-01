@@ -17,7 +17,7 @@ export default function HomePage() {
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
                     Connecting students with qualified tutors for personalized
-                    learning experiences.
+                    learning experiences. This is a synthetic portfolio demo.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -90,8 +90,8 @@ export default function HomePage() {
                 <div className="space-y-2 flex flex-col items-center justify-center">
                   <h3 className="text-xl text-center font-bold">Find Tutors</h3>
                   <p className="text-muted-foreground text-center">
-                    Search and filter tutors based on subject, location, price,
-                    and availability.
+                    Search approved tutors by name, subject, teaching mode, price,
+                    and rating.
                   </p>
                 </div>
               </div>
@@ -159,11 +159,11 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-2 flex flex-col items-center">
                   <h3 className="text-xl font-bold text-center">
-                    Track Progress
+                    Verified Reviews
                   </h3>
                   <p className="text-muted-foreground text-center">
-                    Monitor your learning journey and manage your educational
-                    goals.
+                    Review completed sessions and read feedback from students
+                    who booked with each tutor.
                   </p>
                 </div>
               </div>

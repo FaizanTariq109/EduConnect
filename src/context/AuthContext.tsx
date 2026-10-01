@@ -1,45 +1,39 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
-import { checkAuth } from "@/util/isAuth";
-
-interface AuthState {
-  auth: boolean;
-  token: string;
-  type: string;
-}
-
-interface AuthContextType {
-  isAuth: AuthState;
-  setIsAuth: (auth: boolean, token: string, type: string) => void;
-}
-
-const defState: AuthState = { auth: false, token: "", type: "" };
-
-const AuthContext = createContext<AuthContextType>({
-  isAuth: defState,
-  setIsAuth: () => {},
-});
-
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { api } from "@/lib/client-api";
+import type { User } from "@/lib/types";
+const AuthContext = createContext<{
+  user: User | null;
+  loading: boolean;
+  reload: () => Promise<void>;
+}>({ user: null, loading: true, reload: async () => {} });
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuth, setAuthState] = useState<AuthState>(defState);
-  const setIsAuth = (auth: boolean, token: string, type: string) => {
-    setAuthState({ auth, token, type });
-  };
-  useEffect(() => {
-    checkAuth(setIsAuth);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const reload = useCallback(async () => {
+    try {
+      setUser((await api<{ user: User }>("auth")).user);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
-
+  useEffect(() => {
+    void reload();
+  }, [reload]);
   return (
-    <AuthContext.Provider value={{ isAuth, setIsAuth }}>
+    <AuthContext.Provider value={{ user, loading, reload }}>
       {children}
     </AuthContext.Provider>
   );
 }
-
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 }
